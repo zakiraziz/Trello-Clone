@@ -1,0 +1,14 @@
+# TrelloClone
+
+TrelloClone is a modern collaborative board platform for organizing projects, tasks, and team workflows.
+
+## Main sections
+- Home: /
+- Pricing: /pricing
+- Login: /login
+- Register: /register
+
+## Key features
+- Create and manage boards
+- Organize lists and cards
+- Track activity and collaborate with teammates
