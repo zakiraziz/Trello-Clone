@@ -1,9 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { getBoards } from '../api/getBoards'
 
-export const useBoards = () => {
+const PAGE_SIZE = 50
+
+export const useBoards = (page = 0) => {
   return useQuery({
-    queryKey: ['boards'],
-    queryFn: getBoards,
+    queryKey: ['boards', page],
+    queryFn: () => getBoards({ limit: PAGE_SIZE, offset: page * PAGE_SIZE }),
+    placeholderData: (previousData) => previousData,
   })
 }
