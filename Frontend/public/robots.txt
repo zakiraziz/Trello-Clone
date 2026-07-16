@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://musical-churros-ade634.netlify.app/sitemap.xml
+Sitemap: https://trello-saas-app.b4a.run/sitemap.xml

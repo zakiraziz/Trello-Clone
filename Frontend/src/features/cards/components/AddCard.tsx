@@ -4,7 +4,7 @@ import { Plus, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { createCard } from '../api/createCard'
-import { useToast } from '../../../../hooks/useToast'
+import { toast } from 'sonner'
 
 interface AddCardProps {
   listId: string
@@ -14,13 +14,12 @@ export const AddCard = ({ listId }: AddCardProps) => {
   const [isAdding, setIsAdding] = useState(false)
   const [title, setTitle] = useState('')
   const queryClient = useQueryClient()
-  const { success } = useToast()
 
   const { mutate, isPending } = useMutation({
     mutationFn: createCard,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['board'] })
-      success('Card created!', { description: 'The task is now part of your board.' })
+      toast.success('Card created!', { description: 'The task is now part of your board.' })
       setTitle('')
       setIsAdding(false)
     },

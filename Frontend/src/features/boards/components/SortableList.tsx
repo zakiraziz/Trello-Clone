@@ -22,9 +22,10 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 
 interface SortableListProps {
   list: ListType & { cards?: CardType[] }
+  isDragging?: boolean
 }
 
-export const SortableList = ({ list }: SortableListProps) => {
+export const SortableList = ({ list, isDragging }: SortableListProps) => {
   const { mutate: moveCard, isPending: isMovingCard } = useMoveCard()
   const queryClient = useQueryClient()
   const [isEditingTitle, setIsEditingTitle] = useState(false)
@@ -61,7 +62,7 @@ export const SortableList = ({ list }: SortableListProps) => {
   })
 
   return (
-    <div className="w-80 shrink-0 bg-gray-200 dark:bg-gray-800 rounded-lg p-3 flex flex-col">
+    <div className={`w-80 shrink-0 bg-gray-200 dark:bg-gray-800 rounded-lg p-3 flex flex-col transition-shadow ${isDragging ? 'shadow-inner opacity-50' : ''}`}>
       <div className="flex items-center justify-between mb-3">
         {isEditingTitle ? (
           <Input
