@@ -2,7 +2,7 @@ export interface User {
   id: string
   email: string
   name: string
-  proTier: boolean
+  plan: 'free' | 'pro' | 'business'
   avatar?: string
 }
 

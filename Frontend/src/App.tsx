@@ -6,6 +6,7 @@ import { AuthProvider } from './providers/AuthProvider'
 import { useAuth } from './features/auth/hooks/useAuth'
 import { Loader } from './components/ui/loader'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { Navbar } from './components/Navbar'
 
 const Login = React.lazy(() => import('./features/auth/pages/Login').then(m => ({ default: m.Login })))
 const Register = React.lazy(() => import('./features/auth/pages/Register').then(m => ({ default: m.Register })))
@@ -13,6 +14,7 @@ const Landing = React.lazy(() => import('./features/landing/Landing').then(m => 
 const Pricing = React.lazy(() => import('./features/pricing/Pricing').then(m => ({ default: m.Pricing })))
 const Profile = React.lazy(() => import('./features/profile/Profile').then(m => ({ default: m.Profile })))
 const Settings = React.lazy(() => import('./features/settings/Settings').then(m => ({ default: m.Settings })))
+const SearchPage = React.lazy(() => import('./features/pages/SearchPage').then(m => ({ default: m.SearchPage })))
 const ActivityLog = React.lazy(() => import('./features/activity/ActivityLog').then(m => ({ default: m.ActivityLog })))
 const Dashboard = React.lazy(() => import('./features/boards/pages/Dashboard').then(m => ({ default: m.Dashboard })))
 const BoardPage = React.lazy(() => import('./features/boards/pages/BoardPage').then(m => ({ default: m.BoardPage })))
@@ -46,6 +48,7 @@ function App() {
       <ErrorBoundary>
         <AuthProvider>
           <BrowserRouter>
+            <Navbar />
             <Suspense fallback={<Loader containerClassName="flex items-center justify-center min-h-screen" />}>
               <Routes>
                 <Route path="/" element={<Landing />} />
@@ -114,6 +117,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Settings />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/search"
+                  element={
+                    <ProtectedRoute>
+                      <SearchPage />
                     </ProtectedRoute>
                   }
                 />

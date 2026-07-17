@@ -1,12 +1,21 @@
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Board } from '../types'
+import { useStarBoard } from '@/hooks/useStarBoard'
 
 interface BoardCardProps {
   board: Board
 }
 
 export const BoardCard = ({ board }: BoardCardProps) => {
+  const starMutation = useStarBoard()
+
+  const handleStarClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    starMutation.mutate({ boardId: board.id, isStarred: !board.is_starred })
+  }
+
   return (
     <Link
       to={`/board/${board.id}`}
@@ -22,9 +31,20 @@ export const BoardCard = ({ board }: BoardCardProps) => {
       <div className="relative">
         <div className="flex items-start justify-between gap-3">
           <h3 className="truncate text-lg font-semibold text-slate-900">{board.name}</h3>
-          <span className="rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-700">
-            Open
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleStarClick}
+              className="rounded-full bg-white/70 p-1.5 transition-colors hover:bg-white"
+              aria-label={board.is_starred ? 'Unstar board' : 'Star board'}
+            >
+              <Star
+                className={`h-4 w-4 ${board.is_starred ? 'fill-yellow-500 text-yellow-500' : 'text-slate-700'}`}
+              />
+            </button>
+            <span className="rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-700">
+              Open
+            </span>
+          </div>
         </div>
         {board.description && (
           <p className="mt-2 line-clamp-2 text-sm text-slate-700">

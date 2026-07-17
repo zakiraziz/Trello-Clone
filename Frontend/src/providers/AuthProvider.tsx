@@ -4,7 +4,7 @@ interface User {
   id: string
   email: string
   name: string
-  proTier: boolean
+  plan: 'free' | 'pro' | 'business'
   avatar?: string
 }
 
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             id: data.id,
             email: data.email,
             name: data.name,
-            proTier: data.pro_tier ?? data.proTier ?? false,
+            plan: data.plan ?? data.pro_tier ? 'pro' : 'free',
             avatar: data.avatar,
           })
         } else {

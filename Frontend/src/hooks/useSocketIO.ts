@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { io, Socket } from 'socket.io-client'
+// @ts-ignore
+import { io } from 'socket.io-client'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
@@ -13,7 +14,7 @@ interface UseSocketIOOptions {
 
 export const useSocketIO = (options: UseSocketIOOptions = {}) => {
   const { isAuthenticated } = useAuth()
-  const socketRef = useRef<Socket | null>(null)
+  const socketRef = useRef<any | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const { boardId, onBoardUpdate, onCardUpdate, onListUpdate } = options
 
@@ -40,15 +41,15 @@ export const useSocketIO = (options: UseSocketIOOptions = {}) => {
       setIsConnected(false)
     })
 
-    socket.on('boardUpdated', (data) => {
+    socket.on('boardUpdated', (data: any) => {
       onBoardUpdate?.(data)
     })
 
-    socket.on('cardUpdated', (data) => {
+    socket.on('cardUpdated', (data: any) => {
       onCardUpdate?.(data)
     })
 
-    socket.on('listUpdated', (data) => {
+    socket.on('listUpdated', (data: any) => {
       onListUpdate?.(data)
     })
 

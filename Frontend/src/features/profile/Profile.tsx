@@ -170,10 +170,10 @@ export const Profile = () => {
             <div className="text-center mb-6">
               <h2 className="text-xl font-semibold">{user?.name}</h2>
               <p className="text-sm text-muted-foreground">{user?.email}</p>
-              {user?.proTier && (
+              {user?.plan !== 'free' && (
                 <span className="inline-flex items-center gap-1 mt-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
                   <CheckCircle className="w-3 h-3" />
-                  Pro Member
+                  {user?.plan === 'pro' ? 'Pro Member' : 'Business'}
                 </span>
               )}
             </div>
@@ -314,21 +314,23 @@ export const Profile = () => {
                 <div>
                   <h2 className="text-xl font-semibold mb-4">Account Type</h2>
                   <div className="bg-muted p-4 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium">{user?.proTier ? 'Pro Plan' : 'Free Plan'}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {user?.proTier
-                            ? 'Unlimited boards, members, and real-time features'
-                            : '10 boards max, 3 members per board'}
-                        </p>
-                      </div>
-                      {!user?.proTier && (
-                        <Button asChild>
-                          <a href="/pricing">Upgrade to Pro</a>
-                        </Button>
-                      )}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">
+                        {user?.plan === 'free' ? 'Free Plan' : user?.plan === 'pro' ? 'Pro Plan' : 'Business Plan'}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {user?.plan === 'free'
+                          ? '10 boards max, 3 members per board'
+                          : 'Unlimited boards, members, and real-time features'}
+                      </p>
                     </div>
+                    {user?.plan === 'free' && (
+                      <Button asChild>
+                        <a href="/pricing">Upgrade to Pro</a>
+                      </Button>
+                    )}
+                  </div>
                   </div>
                 </div>
 

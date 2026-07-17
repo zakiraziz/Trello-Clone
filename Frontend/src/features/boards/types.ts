@@ -5,6 +5,7 @@ export interface Board {
   owner_id: string
   background_color?: string
   is_archived: boolean
+  is_starred?: boolean
   created_at: string
   updated_at: string
 }
@@ -24,6 +25,7 @@ export interface List {
 export interface Card {
   id: string
   list_id: string
+  board_id: string
   title: string
   description?: string
   position: number
@@ -33,4 +35,16 @@ export interface Card {
   created_by: string
   created_at: string
   updated_at: string
+  labels?: Array<{ id: string; name: string; color: string }>
+  checklists?: Array<{
+    id: string
+    title: string
+    items: Array<{ id: string; text: string; completed: boolean }>
+  }>
+  comments?: Array<{
+    id: string
+    text: string
+    author: { id: string; name: string; avatar?: string }
+    createdAt: string
+  }>
 }

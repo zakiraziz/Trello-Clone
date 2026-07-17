@@ -1,0 +1,30 @@
+{
+  "name": "TrelloClone",
+  "short_name": "TrelloClone",
+  "description": "Plan, organize, and collaborate with boards, lists, and cards in one calm workspace.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "any",
+  "categories": ["productivity", "project management", "collaboration"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [],
+  "lang": "en-US",
+  "dir": "ltr",
+  "scope": "/",
+  "id": "/"
+}

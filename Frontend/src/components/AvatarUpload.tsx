@@ -39,7 +39,7 @@ const AvatarUpload = ({ previewUrl, onFileSelect }: AvatarUploadProps) => {
         aria-label="Upload avatar"
       >
         {previewUrl ? (
-          <img src={previewUrl} alt="Avatar preview" className="w-full h-full object-cover" />
+          <img src={previewUrl} alt="Avatar preview" loading="lazy" className="w-full h-full object-cover" />
         ) : (
           <div className="flex items-center justify-center h-full text-gray-500">No avatar</div>
         )}

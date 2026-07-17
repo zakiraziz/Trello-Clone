@@ -287,18 +287,20 @@ export const Settings = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className={`p-4 rounded-lg border ${
-                user?.proTier ? 'border-green-500 bg-green-500/5' : 'border-yellow-500 bg-yellow-500/5'
+                user?.plan !== 'free' ? 'border-green-500 bg-green-500/5' : 'border-yellow-500 bg-yellow-500/5'
               }`}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold">{user?.proTier ? 'Pro Plan' : 'Free Plan'}</p>
+                    <p className="font-semibold">
+                      {user?.plan === 'free' ? 'Free Plan' : user?.plan === 'pro' ? 'Pro Plan' : 'Business Plan'}
+                    </p>
                     <p className="text-sm text-muted-foreground">
-                      {user?.proTier
-                        ? '$10/month • Unlimited boards & members'
-                        : 'Free • Up to 3 boards, 3 members per board'}
+                      {user?.plan === 'free'
+                        ? 'Free • Up to 3 boards, 3 members per board'
+                        : '$10/month • Unlimited boards & members'}
                     </p>
                   </div>
-                  {!user?.proTier && (
+                  {user?.plan === 'free' && (
                     <Button asChild>
                       <a href="/pricing">Upgrade to Pro</a>
                     </Button>
@@ -308,7 +310,7 @@ export const Settings = () => {
             </CardContent>
           </Card>
 
-          {user?.proTier && (
+          {user?.plan !== 'free' && (
             <Card>
               <CardHeader>
                 <CardTitle>Subscription Details</CardTitle>
