@@ -23,7 +23,7 @@ console.log('🌐 Creating Netlify site...');
 try {
   const site = JSON.parse(
     execSync(
-      `npx netlify api createSite --data '{"name":"trello-saas-live","account_slug":"zakiraziz","force_ssl":true}'`,
+      `npx netlify api createSite --data "{\\"force_ssl\\":true}"`,
       { cwd: FRONTEND_DIR, encoding: 'utf8' }
     )
   );

@@ -1,70 +1,44 @@
-import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { ArrowRight, Sparkles } from 'lucide-react'
 
 interface InfoPageProps {
-  eyebrow?: string
   title: string
   description: string
-  ctaLabel?: string
-  ctaTo?: string
+  ctaLabel: string
+  ctaTo: string
   secondaryLabel?: string
   secondaryTo?: string
-  children?: ReactNode
 }
 
-export const InfoPage = ({
-  eyebrow = 'Product update',
-  title,
-  description,
-  ctaLabel = 'Get started',
-  ctaTo = '/register',
-  secondaryLabel,
-  secondaryTo,
-  children,
-}: InfoPageProps) => {
+export const InfoPage = ({ title, description, ctaLabel, ctaTo, secondaryLabel, secondaryTo }: InfoPageProps) => {
   return (
     <div className="min-h-screen bg-background">
-      <nav className="border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Sparkles className="h-4 w-4 text-primary-foreground" />
-            </div>
-            TrelloClone
-          </Link>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <Link to="/" className="hover:text-foreground">Home</Link>
-            <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
-            <Link to="/login" className="hover:text-foreground">Login</Link>
+      <main id="main-content" className="container mx-auto px-6 py-24">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8">
+            <Sparkles className="w-4 h-4" />
+            <span>TrelloClone</span>
           </div>
-        </div>
-      </nav>
-
-      <main className="mx-auto flex max-w-5xl items-center px-6 py-24">
-        <div className="w-full rounded-3xl border border-border bg-card p-8 shadow-sm sm:p-12">
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary">{eyebrow}</p>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{title}</h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">{description}</p>
-
-          <div className="mt-8 flex flex-wrap gap-3">
-            {ctaTo && (
-              <Link to={ctaTo}>
-                <Button className="gap-2">
-                  {ctaLabel}
-                  <ArrowRight className="h-4 w-4" />
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">{title}</h1>
+          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+            {description}
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link to={ctaTo}>
+              <Button size="lg" className="gap-2">
+                {ctaLabel}
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+            {secondaryLabel && secondaryTo && (
+              <Link to={secondaryTo}>
+                <Button size="lg" variant="outline">
+                  {secondaryLabel}
                 </Button>
               </Link>
             )}
-            {secondaryTo && secondaryLabel && (
-              <Link to={secondaryTo}>
-                <Button variant="outline">{secondaryLabel}</Button>
-              </Link>
-            )}
           </div>
-
-          {children}
         </div>
       </main>
     </div>

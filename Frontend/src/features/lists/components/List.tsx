@@ -2,12 +2,24 @@ import { List as ListType } from '../types'
 import { Card as CardType } from '@/features/boards/types'
 import { Card } from '@/features/cards/components/Card'
 import { AddCard } from '@/features/cards/components/AddCard'
+import { api } from '@/lib/api-client'
+import { toast } from 'sonner'
 
 interface ListProps {
   list: ListType & { cards?: CardType[] }
 }
 
 export const List = ({ list }: ListProps) => {
+  const handleAddCard = (title: string) => {
+    void api.post(`/lists/${list.id}/cards`, { title })
+      .then(() => {
+        toast.success('Card added!')
+      })
+      .catch((error: any) => {
+        toast.error(error.response?.data?.error || 'Failed to add card')
+      })
+  }
+
   return (
     <div className="w-80 shrink-0 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
@@ -27,7 +39,7 @@ export const List = ({ list }: ListProps) => {
         )}
       </div>
 
-      <AddCard listId={list.id} />
+      <AddCard listId={list.id} onAdd={handleAddCard} />
     </div>
   )
 }

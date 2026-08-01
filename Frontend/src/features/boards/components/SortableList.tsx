@@ -23,13 +23,25 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 interface SortableListProps {
   list: ListType & { cards?: CardType[] }
   isDragging?: boolean
+  isFiltering?: boolean
 }
 
-export const SortableList = ({ list, isDragging }: SortableListProps) => {
+export const SortableList = ({ list, isDragging, isFiltering }: SortableListProps) => {
   const { mutate: moveCard, isPending: isMovingCard } = useMoveCard()
   const queryClient = useQueryClient()
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [editTitle, setEditTitle] = useState(list.title)
+
+  const handleAddCard = (title: string) => {
+    void api.post(`/lists/${list.id}/cards`, { title })
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['board'] })
+        toast.success('Card added!')
+      })
+      .catch((error: any) => {
+        toast.error(error.response?.data?.error || 'Failed to add card')
+      })
+  }
 
   const updateListTitle = useMutation({
     mutationFn: async (data: { title: string }) => {
@@ -138,10 +150,17 @@ export const SortableList = ({ list, isDragging }: SortableListProps) => {
               index={index}
               onMove={moveCard}
               isMoving={isMovingCard}
+              isFiltering={isFiltering}
             />
           ))}
+          {(!list.cards || list.cards.length === 0) && (
+            <div className="border-2 border-dashed border-gray-300/50 dark:border-gray-600/50 rounded-lg p-6 text-center text-sm text-gray-500 dark:text-gray-400 flex flex-col items-center justify-center opacity-70">
+              <span className="block font-medium mb-1">List is empty</span>
+              <span className="text-xs">Drag cards here</span>
+            </div>
+          )}
         </SortableContext>
-        <AddCard listId={list.id} />
+        <AddCard listId={list.id} onAdd={handleAddCard} />
       </div>
     </div>
   )
@@ -153,12 +172,14 @@ interface SortableCardProps {
   index: number
   onMove: (data: { cardId: string; listId: string; position: number }) => void
   isMoving: boolean
+  isFiltering?: boolean
 }
 
-const SortableCard = ({ card, listId, index: _index, onMove: _onMove, isMoving: _isMoving }: SortableCardProps) => {
+const SortableCard = ({ card, listId, index: _index, onMove: _onMove, isMoving: _isMoving, isFiltering }: SortableCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card.id,
     data: { listId, card },
+    disabled: isFiltering,
   })
 
   const style = {
@@ -178,15 +199,17 @@ const SortableCard = ({ card, listId, index: _index, onMove: _onMove, isMoving: 
       {...listeners}
     >
       <div className="flex items-start gap-2">
-        <button
-          type="button"
-          {...attributes}
-          {...listeners}
-          className="p-1 text-muted-foreground hover:text-foreground flex-shrink-0 mt-0.5"
-          aria-label={`Drag card ${card.title}`}
-        >
-          <GripVertical className="w-4 h-4" />
-        </button>
+        {!isFiltering && (
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            className="p-1 text-muted-foreground hover:text-foreground flex-shrink-0 mt-0.5"
+            aria-label={`Drag card ${card.title}`}
+          >
+            <GripVertical className="w-4 h-4" />
+          </button>
+        )}
         <div className="flex-1 min-w-0">
           <Card card={card} />
         </div>

@@ -1,5 +1,4 @@
 const pool = require('../db/pool');
-const { v4: uuidv4 } = require('uuid');
 
 class List {
     static async findByBoard(boardId) {
@@ -11,12 +10,11 @@ class List {
     }
 
     static async create(boardId, title, position = 0) {
-        const id = uuidv4();
         const result = await pool.query(
-            `INSERT INTO lists (id, board_id, title, position)
-             VALUES ($1, $2, $3, $4)
+            `INSERT INTO lists (board_id, title, position)
+             VALUES ($1, $2, $3)
              RETURNING *`,
-            [id, boardId, title, position]
+            [boardId, title, position]
         );
         return result.rows[0];
     }

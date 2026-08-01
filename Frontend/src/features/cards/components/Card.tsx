@@ -2,13 +2,22 @@ import { useState } from 'react'
 import { Card as CardType } from '../types'
 import { format } from 'date-fns'
 import { CardModal } from './CardModal'
+import { useQueryClient } from '@tanstack/react-query'
 
 interface CardProps {
   card: CardType
+  boardId?: string
+  listId?: string
 }
 
-export const Card = ({ card }: CardProps) => {
+export const Card = ({ card, boardId: _boardId, listId: _listId }: CardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const queryClient = useQueryClient()
+
+  const handleCardUpdate = () => {
+    queryClient.invalidateQueries({ queryKey: ['board', card.board_id] })
+    setIsModalOpen(false)
+  }
 
   return (
     <>
@@ -33,10 +42,7 @@ export const Card = ({ card }: CardProps) => {
         card={card} 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
-        onUpdate={(updatedCard) => {
-          // Handle card update - you may want to pass this as a prop
-          console.log('Card updated:', updatedCard)
-        }}
+        onUpdate={handleCardUpdate}
       />
     </>
   )

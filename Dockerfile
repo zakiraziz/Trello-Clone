@@ -1,66 +1,59 @@
-# =====================================================================
-# Trello SaaS — Root Dockerfile for Back4app / Single Container Deploy
-# =====================================================================
+# Multi-stage build for production
+FROM node:18-alpine AS builder
 
-# ---------- Stage 1: Build Frontend ----------
-FROM node:18-alpine AS frontend-builder
-
+# Set working directory
 WORKDIR /app
 
-# Copy frontend package files
-COPY Frontend/package*.json ./
+# Copy package files
+COPY Backend/package*.json ./Backend/
+COPY Frontend/package*.json ./Frontend/
 
-# Install all dependencies (including devDependencies for build)
-RUN npm ci
+# Install dependencies
+RUN cd Backend && npm ci --only=production
+RUN cd Frontend && npm ci
 
-# Copy frontend source code
-COPY Frontend/ ./
+# Copy source code
+COPY Backend ./Backend
+COPY Frontend ./Frontend
+COPY Database ./Database
+COPY start.sh ./start.sh
 
-# Build the static files
-RUN npm run build
+# Build frontend
+RUN cd Frontend && npm run build
 
-# ---------- Stage 2: Build Backend ----------
-FROM node:18-alpine AS backend-builder
+# Production stage
+FROM node:18-alpine AS production
 
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Create app user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# Set working directory
 WORKDIR /app
 
-# Copy backend package files
-COPY Backend/package*.json ./
+# Copy built frontend from builder
+COPY --from=builder --chown=nodejs:nodejs /app/Frontend/dist ./Frontend/dist
 
-# Install only production dependencies
-RUN npm ci --only=production
+# Copy backend dependencies and source
+COPY --from=builder --chown=nodejs:nodejs /app/Backend/node_modules ./Backend/node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/Backend/src ./Backend/src
+COPY --from=builder --chown=nodejs:nodejs /app/Backend/package*.json ./Backend/
+COPY --from=builder --chown=nodejs:nodejs /app/Database ./Database
+COPY --from=builder --chown=nodejs:nodejs /app/start.sh ./start.sh
 
-# Copy backend source code
-COPY Backend/ ./
+# Switch to non-root user
+USER nodejs
 
-# ---------- Stage 3: Production Runtime ----------
-FROM node:18-alpine
-
-# Install nginx
-RUN apk add --no-cache nginx
-
-# Create required directories
-RUN mkdir -p /run/nginx /var/lib/nginx /var/log/nginx /app
-
-# Copy backend from backend-builder
-COPY --from=backend-builder /app /app/backend
-
-# Copy frontend build from frontend-builder
-COPY --from=frontend-builder /app/dist /app/frontend
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/http.d/default.conf
-
-# Copy startup script
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
-
-# Expose ports: 80 (nginx/frontend), 5000 (backend API)
-EXPOSE 80
+# Expose port
+ EXPOSE 3001 5000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD wget -qO- http://localhost:80/api/health || exit 1
+ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+   CMD node -e "require('http').get('http://localhost:5000/api/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"
 
-# Start nginx and the backend
-CMD ["/start.sh"]
+# Start application
+ ENTRYPOINT ["dumb-init", "--"]
+ CMD ["node", "Backend/src/server.js"]

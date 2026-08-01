@@ -1,5 +1,4 @@
 const pool = require('../db/pool');
-const { v4: uuidv4 } = require('uuid');
 
 class Card {
     static async findByList(listId) {
@@ -11,12 +10,11 @@ class Card {
     }
 
     static async create(listId, title, description = '', position = 0, dueDate = null, assignedTo = null, createdBy) {
-        const id = uuidv4();
         const result = await pool.query(
-            `INSERT INTO cards (id, list_id, title, description, position, due_date, created_by, assigned_to)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            `INSERT INTO cards (list_id, title, description, position, due_date, created_by, assigned_to)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)
              RETURNING *`,
-            [id, listId, title, description, position, dueDate, createdBy, assignedTo]
+            [listId, title, description, position, dueDate, createdBy, assignedTo]
         );
         return result.rows[0];
     }
@@ -56,12 +54,11 @@ class Card {
     }
 
     static async addComment(cardId, userId, content) {
-        const id = uuidv4();
         const result = await pool.query(
-            `INSERT INTO card_comments (id, card_id, user_id, content)
-             VALUES ($1, $2, $3, $4)
+            `INSERT INTO card_comments (card_id, user_id, content)
+             VALUES ($1, $2, $3)
              RETURNING *`,
-            [id, cardId, userId, content]
+            [cardId, userId, content]
         );
         return result.rows[0];
     }
@@ -76,6 +73,110 @@ class Card {
             [cardId]
         );
         return result.rows;
+    }
+
+    static async addLabel(cardId, name, color) {
+        const result = await pool.query(
+            `INSERT INTO card_labels (card_id, name, color)
+             VALUES ($1, $2, $3)
+             RETURNING *`,
+            [cardId, name, color]
+        );
+        return result.rows[0];
+    }
+
+    static async getLabels(cardId) {
+        const result = await pool.query(
+            'SELECT * FROM card_labels WHERE card_id = $1',
+            [cardId]
+        );
+        return result.rows;
+    }
+
+    static async removeLabel(cardId, labelId) {
+        await pool.query(
+            'DELETE FROM card_labels WHERE card_id = $1 AND id = $2',
+            [cardId, labelId]
+        );
+        return true;
+    }
+
+    static async createChecklist(cardId, title) {
+        const result = await pool.query(
+            `INSERT INTO card_checklists (card_id, title)
+             VALUES ($1, $2)
+             RETURNING *`,
+            [cardId, title]
+        );
+        return result.rows[0];
+    }
+
+    static async getChecklists(cardId) {
+        const result = await pool.query(
+            `SELECT c.*,
+                COALESCE(
+                    (SELECT json_agg(json_build_object(
+                        'id', i.id,
+                        'checklist_id', i.checklist_id,
+                        'text', i.text,
+                        'completed', i.is_completed,
+                        'position', i.position
+                    ) ORDER BY i.position)
+                    FROM card_checklist_items i
+                    WHERE i.checklist_id = c.id
+                ), '[]'::json) as items
+            FROM card_checklists c
+            WHERE c.card_id = $1
+            ORDER BY c.position`,
+            [cardId]
+        );
+        return result.rows;
+    }
+
+    static async updateChecklist(checklistId, updates) {
+        const { title } = updates;
+        const result = await pool.query(
+            `UPDATE card_checklists 
+             SET title = COALESCE($1, title)
+             WHERE id = $2
+             RETURNING *`,
+            [title, checklistId]
+        );
+        return result.rows[0];
+    }
+
+    static async deleteChecklist(checklistId) {
+        await pool.query('DELETE FROM card_checklists WHERE id = $1', [checklistId]);
+        return true;
+    }
+
+    static async addChecklistItem(checklistId, text, position = 0) {
+        const result = await pool.query(
+            `INSERT INTO card_checklist_items (checklist_id, text, position)
+             VALUES ($1, $2, $3)
+             RETURNING *`,
+            [checklistId, text, position]
+        );
+        return result.rows[0];
+    }
+
+    static async updateChecklistItem(itemId, updates) {
+        const { text, completed, position } = updates;
+        const result = await pool.query(
+            `UPDATE card_checklist_items 
+             SET text = COALESCE($1, text),
+                 is_completed = COALESCE($2, is_completed),
+                 position = COALESCE($3, position)
+             WHERE id = $4
+             RETURNING *`,
+            [text, completed, position, itemId]
+        );
+        return result.rows[0];
+    }
+
+    static async deleteChecklistItem(itemId) {
+        await pool.query('DELETE FROM card_checklist_items WHERE id = $1', [itemId]);
+        return true;
     }
 }
 

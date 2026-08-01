@@ -1,50 +1,55 @@
 const pool = require('../db/pool');
-const { v4: uuidv4 } = require('uuid');
 
 class Activity {
-    static async log(boardId, userId, action, entityType, entityId, details = {}) {
-        const id = uuidv4();
-        await pool.query(
-            `INSERT INTO activity_logs (id, board_id, user_id, action, entity_type, entity_id, details)
-             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [id, boardId, userId, action, entityType, entityId, details]
-        );
-        return id;
-    }
+  static async log(boardId, userId, action, entityType, entityId, metadata = {}) {
+    const result = await pool.query(
+      `INSERT INTO activities (board_id, user_id, action, entity_type, entity_id, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [boardId, userId, action, entityType, entityId, metadata]
+    );
+    return result.rows[0];
+  }
 
-    static async findByBoard(boardId, limit = 50, offset = 0) {
-        const result = await pool.query(
-            `SELECT 
-                al.*,
-                u.name as user_name,
-                u.email as user_email,
-                u.avatar_url
-             FROM activity_logs al
-             LEFT JOIN users u ON al.user_id = u.id
-             WHERE al.board_id = $1
-             ORDER BY al.created_at DESC
-             LIMIT $2 OFFSET $3`,
-            [boardId, limit, offset]
-        );
-        return result.rows;
-    }
+  static async getBoardActivities(boardId, limit = 50, offset = 0) {
+    const result = await pool.query(
+      `SELECT a.*, u.name as user_name, u.email as user_email
+       FROM activities a
+       LEFT JOIN users u ON a.user_id = u.id
+       WHERE a.board_id = $1
+       ORDER BY a.created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [boardId, limit, offset]
+    );
+    return result.rows;
+  }
 
-    static async findRecent(userId, limit = 20) {
-        const result = await pool.query(
-            `SELECT 
-                al.*,
-                b.name as board_name,
-                u.name as user_name
-             FROM activity_logs al
-             JOIN boards b ON al.board_id = b.id
-             JOIN users u ON al.user_id = u.id
-             WHERE al.user_id = $1 OR b.owner_id = $1
-             ORDER BY al.created_at DESC
-             LIMIT $2`,
-            [userId, limit]
-        );
-        return result.rows;
-    }
+  static async getAllActivities(limit = 100, offset = 0) {
+    const result = await pool.query(
+      `SELECT a.*, u.name as user_name, u.email as user_email, b.name as board_name
+       FROM activities a
+       LEFT JOIN users u ON a.user_id = u.id
+       LEFT JOIN boards b ON a.board_id = b.id
+       ORDER BY a.created_at DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
+    return result.rows;
+  }
+
+  static async getUserActivities(userId, limit = 50, offset = 0) {
+    const result = await pool.query(
+      `SELECT a.*, u.name as user_name, b.name as board_name
+       FROM activities a
+       LEFT JOIN users u ON a.user_id = u.id
+       LEFT JOIN boards b ON a.board_id = b.id
+       WHERE a.user_id = $1
+       ORDER BY a.created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [userId, limit, offset]
+    );
+    return result.rows;
+  }
 }
 
 module.exports = Activity;

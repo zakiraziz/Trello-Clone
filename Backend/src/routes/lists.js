@@ -3,6 +3,8 @@ const router = express.Router();
 const { checkBoardAccess } = require('../middleware/auth');
 const List = require('../models/List');
 const Activity = require('../models/Activity');
+const AuditLog = require('../models/AuditLog');
+const pool = require('../db/pool');
 
 router.post('/', checkBoardAccess, async (req, res) => {
     const { board_id, title, position } = req.body;
@@ -17,6 +19,12 @@ router.post('/', checkBoardAccess, async (req, res) => {
     try {
         const list = await List.create(board_id, title, position);
         await Activity.log(board_id, req.user.id, 'created_list', 'list', list.id, { title });
+        await AuditLog.log(req.user.id, 'list_created', 'list', list.id, { boardId: board_id, title }, req.ip, req.headers['user-agent']);
+
+        const io = req.app.get('io');
+        if (io) {
+            io.broadcastToBoard(board_id, 'listCreated', { list, boardId: board_id, userId: req.user.id });
+        }
 
         res.status(201).json({
             message: 'List created successfully!',
@@ -38,6 +46,12 @@ router.put('/:id', async (req, res) => {
 
         if (boardId) {
             await Activity.log(boardId, req.user.id, 'updated_list', 'list', req.params.id, { title });
+            await AuditLog.log(req.user.id, 'list_updated', 'list', req.params.id, { boardId, title }, req.ip, req.headers['user-agent']);
+
+            const io = req.app.get('io');
+            if (io) {
+                io.broadcastToBoard(boardId, 'listUpdated', { list, boardId, userId: req.user.id });
+            }
         }
 
         res.json({
@@ -59,6 +73,12 @@ router.delete('/:id', async (req, res) => {
 
         if (boardId) {
             await Activity.log(boardId, req.user.id, 'deleted_list', 'list', req.params.id);
+            await AuditLog.log(req.user.id, 'list_deleted', 'list', req.params.id, { boardId }, req.ip, req.headers['user-agent']);
+
+            const io = req.app.get('io');
+            if (io) {
+                io.broadcastToBoard(boardId, 'listDeleted', { listId: req.params.id, boardId, userId: req.user.id });
+            }
         }
 
         res.json({ message: 'List deleted successfully!' });
@@ -81,6 +101,11 @@ router.put('/reorder/:boardId', checkBoardAccess, async (req, res) => {
     try {
         await List.reorder(req.params.boardId, listOrder);
         await Activity.log(req.params.boardId, req.user.id, 'reordered_lists', 'board', req.params.boardId, { listOrder });
+
+        const io = req.app.get('io');
+        if (io) {
+            io.broadcastToBoard(req.params.boardId, 'listsReordered', { boardId: req.params.boardId, listOrder, userId: req.user.id });
+        }
 
         res.json({ message: 'Lists reordered successfully!' });
     } catch (error) {

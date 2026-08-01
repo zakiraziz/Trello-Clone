@@ -18,6 +18,18 @@ echo "  Port: $PORT"
 echo "  Node: $(node --version)"
 echo "======================================"
 
+# Use production database pool if DATABASE_URL is set
+if [ -n "$DATABASE_URL" ]; then
+    echo "Using production PostgreSQL database"
+    cd /app/backend
+    # Replace mock pool with production pool
+    if [ -f "src/db/pool.prod.js" ]; then
+        cp src/db/pool.prod.js src/db/pool.js
+    fi
+else
+    echo "WARNING: DATABASE_URL not set, using in-memory database"
+fi
+
 # Start nginx in the background
 echo "Starting nginx..."
 nginx -g "daemon off;" &

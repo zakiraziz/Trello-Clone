@@ -45,6 +45,6 @@ export interface Card {
     id: string
     text: string
     author: { id: string; name: string; avatar?: string }
-    createdAt: string
+    created_at: string
   }>
 }

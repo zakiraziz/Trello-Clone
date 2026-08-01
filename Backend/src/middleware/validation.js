@@ -1,5 +1,11 @@
 const Joi = require('joi');
 
+// In development mode, accept both UUIDs and simple numeric IDs
+const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+const idPattern = isDev ? Joi.string().required() : Joi.string().uuid().required();
+
+const optionalIdPattern = isDev ? Joi.string().optional() : Joi.string().uuid().optional();
+
 const schemas = {
     register: Joi.object({
         email: Joi.string().email().required(),
@@ -16,17 +22,17 @@ const schemas = {
         background_color: Joi.string().pattern(/^#[0-9a-fA-F]{6}$/)
     }),
     createList: Joi.object({
-        board_id: Joi.string().uuid().required(),
+        board_id: idPattern,
         title: Joi.string().min(1).max(255).required(),
         position: Joi.number().integer().min(0)
     }),
     createCard: Joi.object({
-        list_id: Joi.string().uuid().required(),
+        list_id: idPattern,
         title: Joi.string().min(1).max(255).required(),
         description: Joi.string().max(1000),
         position: Joi.number().integer().min(0),
         due_date: Joi.date().iso(),
-        assigned_to: Joi.string().uuid()
+        assigned_to: optionalIdPattern
     })
 };
 

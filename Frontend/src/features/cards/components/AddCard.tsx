@@ -1,34 +1,23 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { createCard } from '../api/createCard'
-import { toast } from 'sonner'
 
 interface AddCardProps {
-  listId: string
+  listId?: string
+  onAdd: (title: string) => void
 }
 
-export const AddCard = ({ listId }: AddCardProps) => {
+export const AddCard = ({ listId: _listId, onAdd }: AddCardProps) => {
   const [isAdding, setIsAdding] = useState(false)
   const [title, setTitle] = useState('')
-  const queryClient = useQueryClient()
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: createCard,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['board'] })
-      toast.success('Card created!', { description: 'The task is now part of your board.' })
-      setTitle('')
-      setIsAdding(false)
-    },
-  })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (title.trim()) {
-      mutate({ list_id: listId, title: title.trim() })
+      onAdd(title.trim())
+      setTitle('')
+      setIsAdding(false)
     }
   }
 
@@ -54,11 +43,10 @@ export const AddCard = ({ listId }: AddCardProps) => {
         aria-label="Card title"
         value={title}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-        disabled={isPending}
       />
       <div className="flex gap-2">
-        <Button type="submit" size="sm" disabled={isPending}>
-          {isPending ? 'Adding...' : 'Add Card'}
+        <Button type="submit" size="sm">
+          Add Card
         </Button>
         <Button
           type="button"

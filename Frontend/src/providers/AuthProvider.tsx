@@ -6,6 +6,10 @@ interface User {
   name: string
   plan: 'free' | 'pro' | 'business'
   avatar?: string
+  notification_settings?: {
+    email: Record<string, boolean>
+    in_app: boolean
+  }
 }
 
 interface AuthContextType {
@@ -15,13 +19,20 @@ interface AuthContextType {
   login: (token: string, user: User) => void
   logout: () => void
   setUser: (user: User | null) => void
+  getAccessToken: () => string | null
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null)
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+
+  const getAccessToken = () => {
+    return localStorage.getItem('token')
+  }
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -31,13 +42,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setIsLoading(false)
           return
         }
-        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-        const response = await fetch(`${apiBase}/auth/me`, {
+
+        const response = await fetch(`${API_BASE}/auth/me`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         })
+
         if (response.ok) {
           const data = await response.json()
           setUser({
@@ -46,6 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             name: data.name,
             plan: data.plan ?? data.pro_tier ? 'pro' : 'free',
             avatar: data.avatar,
+            notification_settings: data.notification_settings
           })
         } else {
           localStorage.removeItem('token')
@@ -67,9 +80,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     const token = localStorage.getItem('token')
-    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
     try {
-      await fetch(`${apiBase}/auth/logout`, {
+      await fetch(`${API_BASE}/auth/logout`, {
         method: 'POST',
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       })
@@ -89,6 +101,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         logout,
         setUser,
+        getAccessToken,
       }}
     >
       {children}

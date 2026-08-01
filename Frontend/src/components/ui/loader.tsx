@@ -1,10 +1,23 @@
-// src/components/ui/loader.tsx
-import { Loader2 } from 'lucide-react'
+import { cn } from "@/lib/utils"
+import { Loader2 } from "lucide-react"
 
-export const Loader = ({ className = 'h-8 w-8', containerClassName = 'flex items-center justify-center min-h-[200px]' }: { className?: string; containerClassName?: string }) => {
+interface LoaderProps {
+  size?: "sm" | "md" | "lg"
+  containerClassName?: string
+  text?: string
+}
+
+export const Loader = ({ size = "md", containerClassName, text }: LoaderProps) => {
+  const sizeClasses = {
+    sm: "w-4 h-4",
+    md: "w-8 h-8",
+    lg: "w-12 h-12",
+  }
+
   return (
-    <div className={containerClassName}>
-      <Loader2 className={`animate-spin text-primary ${className}`} />
+    <div className={cn("flex flex-col items-center justify-center gap-3", containerClassName)}>
+      <Loader2 className={cn("animate-spin text-primary", sizeClasses[size])} />
+      {text && <p className="text-sm text-muted-foreground">{text}</p>}
     </div>
   )
 }

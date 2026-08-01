@@ -11,6 +11,8 @@ httpServer.listen(PORT, () => {
     console.log(`📊 Database: ${process.env.DATABASE_URL ? '✅ Connected' : '❌ Missing'}`);
     console.log(`🔐 JWT: ${process.env.JWT_SECRET ? '✅ Configured' : '❌ Missing'}`);
     console.log(`💳 Stripe: ${process.env.STRIPE_SECRET_KEY ? '✅ Configured' : '❌ Missing'}`);
+    console.log(`📧 Email: ${process.env.SENDGRID_API_KEY || process.env.RESEND_API_KEY ? '✅ Configured' : '⚠️ Not configured'}`);
+    console.log(`🔔 Notifications: ✅ Enabled`);
     console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log('='.repeat(60));
 });

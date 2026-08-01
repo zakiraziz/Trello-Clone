@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { Button } from '@/components/ui/button'
+import { NotificationBell } from '@/components/NotificationBell'
 import {
   Layout,
   LogOut,
@@ -65,6 +66,7 @@ export const Navbar = () => {
               </Button>
 
               <div className="flex items-center gap-3">
+                <NotificationBell />
                 <button
                   onClick={() => navigate('/profile')}
                   className="flex items-center gap-2 text-white hover:bg-white/10 px-3 py-2 rounded-md transition-colors"

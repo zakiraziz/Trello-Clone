@@ -1,5 +1,4 @@
 const pool = require('../db/pool');
-const { v4: uuidv4 } = require('uuid');
 
 class Board {
     static async findAll(userId) {
@@ -9,7 +8,7 @@ class Board {
                 (SELECT COUNT(*) FROM lists WHERE board_id = b.id AND is_archived = false) as list_count
              FROM boards b
              LEFT JOIN board_members bm ON b.id = bm.board_id
-             WHERE b.owner_id = $1 OR bm.user_id = $1
+             WHERE (b.owner_id = $1 OR bm.user_id = $1)
              AND b.is_archived = false
              ORDER BY b.created_at DESC`,
             [userId]
@@ -29,12 +28,11 @@ class Board {
     }
 
     static async create(name, ownerId, description = '', backgroundColor = '#f4f5f7') {
-        const id = uuidv4();
         const result = await pool.query(
-            `INSERT INTO boards (id, name, description, owner_id, background_color)
-             VALUES ($1, $2, $3, $4, $5)
+            `INSERT INTO boards (name, description, owner_id, background_color)
+             VALUES ($1, $2, $3, $4)
              RETURNING *`,
-            [id, name, description, ownerId, backgroundColor]
+            [name, description, ownerId, backgroundColor]
         );
         return result.rows[0];
     }
