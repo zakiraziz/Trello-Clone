@@ -6,6 +6,7 @@ const Notification = require('../models/Notification');
 const AuditLog = require('../models/AuditLog');
 const EmailQueue = require('../services/emailQueue');
 const pool = require('../db/pool');
+const { checkBoardAccess } = require('../middleware/auth');
 
 // Create card
 router.post('/', async (req, res) => {
@@ -57,7 +58,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update card
-router.put('/:id', async (req, res) => {
+router.put('/:id', checkBoardAccess, async (req, res) => {
     const { title, description, position, due_date, assigned_to, is_completed } = req.body;
 
     try {
@@ -90,7 +91,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // PATCH route for card updates
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', checkBoardAccess, async (req, res) => {
     const { title, description, position, due_date, assigned_to, is_completed } = req.body;
 
     try {
@@ -120,7 +121,7 @@ router.patch('/:id', async (req, res) => {
 });
 
 // Move card
-router.put('/:id/move', async (req, res) => {
+router.put('/:id/move', checkBoardAccess, async (req, res) => {
     const { list_id, position } = req.body;
 
     if (!list_id) {
@@ -156,7 +157,7 @@ router.put('/:id/move', async (req, res) => {
 });
 
 // Delete card
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', checkBoardAccess, async (req, res) => {
     try {
         const boardResult = await pool.query(
             `SELECT l.board_id FROM cards c
@@ -186,7 +187,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // Add comment
-router.post('/:id/comments', async (req, res) => {
+router.post('/:id/comments', checkBoardAccess, async (req, res) => {
     const content = req.body.text || req.body.content;
 
     if (!content) {
@@ -251,7 +252,7 @@ router.get('/:id/comments', async (req, res) => {
 });
 
 // Update labels
-router.patch('/:id/labels', async (req, res) => {
+router.patch('/:id/labels', checkBoardAccess, async (req, res) => {
     const { labels } = req.body;
     if (!labels || !Array.isArray(labels)) {
         return res.status(400).json({ error: 'Labels required', message: 'Please provide an array of labels' });
