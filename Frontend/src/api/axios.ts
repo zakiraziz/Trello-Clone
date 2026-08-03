@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/.netlify/functions',
+  baseURL: import.meta.env.VITE_API_URL || 'https://trello-backend-production-6c60.up.railway.app/api',
   withCredentials: true,
 });
 

@@ -1,8 +1,35 @@
 import { Link } from 'react-router-dom'
+import { Layout } from 'lucide-react'
 
 export const Landing = () => {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
+      {/* Sticky Navigation Bar */}
+      <nav className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-sm border-b border-slate-800">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
+            <Link to="/" className="flex items-center gap-2 text-white font-bold text-xl">
+              <Layout className="w-6 h-6" />
+              <span>TrelloClone</span>
+            </Link>
+            <div className="flex items-center gap-4">
+              <Link
+                to="/login"
+                className="text-slate-300 hover:text-white text-sm font-medium px-3 py-2 transition-colors"
+              >
+                Log In
+              </Link>
+              <Link
+                to="/register"
+                className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-sm font-semibold px-4 py-2 rounded-full transition-colors"
+              >
+                Sign Up
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -108,14 +135,91 @@ export const Landing = () => {
           </div>
         </section>
 
-        <footer className="mt-20 border-t border-slate-800 pt-10 text-slate-400">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <p className="text-sm">Trello Clone SaaS — Build boards faster.</p>
-            <div className="flex flex-wrap gap-4 text-sm">
-              <Link to="/pricing" className="hover:text-white">Pricing</Link>
-              <Link to="/login" className="hover:text-white">Login</Link>
-              <Link to="/register" className="hover:text-white">Signup</Link>
-              <Link to="/profile" className="hover:text-white">Profile</Link>
+        {/* Comprehensive Footer */}
+        <footer className="mt-20 border-t border-slate-800 pt-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Brand */}
+            <div className="col-span-1 md:col-span-2">
+              <Link to="/" className="flex items-center gap-2 text-white font-bold text-xl mb-4">
+                <Layout className="w-6 h-6" />
+                <span>TrelloClone</span>
+              </Link>
+              <p className="text-slate-400 text-sm max-w-md">
+                Plan, organize, and collaborate with boards, lists, and cards in one calm workspace.
+                Built for modern teams who value simplicity and efficiency.
+              </p>
+            </div>
+
+            {/* Product Links */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Product</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link to="/features" className="text-slate-400 hover:text-white transition-colors">
+                    Features
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/pricing" className="text-slate-400 hover:text-white transition-colors">
+                    Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/security" className="text-slate-400 hover:text-white transition-colors">
+                    Security
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/roadmap" className="text-slate-400 hover:text-white transition-colors">
+                    Roadmap
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal Links */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Legal</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link to="/privacy" className="text-slate-400 hover:text-white transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/terms" className="text-slate-400 hover:text-white transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/cookies" className="text-slate-400 hover:text-white transition-colors">
+                    Cookie Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/contact" className="text-slate-400 hover:text-white transition-colors">
+                    Contact Us
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="border-t border-slate-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-slate-400">
+              © {new Date().getFullYear()} TrelloClone. All rights reserved.
+            </p>
+            <div className="flex gap-6 text-sm">
+              <Link to="/privacy" className="text-slate-400 hover:text-white transition-colors">
+                Privacy
+              </Link>
+              <Link to="/terms" className="text-slate-400 hover:text-white transition-colors">
+                Terms
+              </Link>
+              <Link to="/contact" className="text-slate-400 hover:text-white transition-colors">
+                Contact
+              </Link>
             </div>
           </div>
         </footer>

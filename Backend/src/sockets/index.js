@@ -48,6 +48,23 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
+// Clean up empty board rooms and user sockets every 5 minutes
+setInterval(() => {
+  // Clean up empty board rooms
+  for (const [boardId, sockets] of boardRooms.entries()) {
+    if (sockets.size === 0) {
+      boardRooms.delete(boardId);
+    }
+  }
+  
+  // Clean up empty user sockets
+  for (const [userId, sockets] of userSockets.entries()) {
+    if (sockets.size === 0) {
+      userSockets.delete(userId);
+    }
+  }
+}, 5 * 60 * 1000);
+
 module.exports = (io) => {
   // Apply rate limiter middleware
   io.use(socketRateLimiter);

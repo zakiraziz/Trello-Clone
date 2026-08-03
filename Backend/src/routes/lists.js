@@ -36,7 +36,7 @@ router.post('/', checkBoardAccess, async (req, res) => {
     }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', checkBoardAccess, async (req, res) => {
     const { title, position } = req.body;
 
     try {
@@ -64,7 +64,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', checkBoardAccess, async (req, res) => {
     try {
         const boardResult = await pool.query('SELECT board_id FROM lists WHERE id = $1', [req.params.id]);
         const boardId = boardResult.rows[0]?.board_id;

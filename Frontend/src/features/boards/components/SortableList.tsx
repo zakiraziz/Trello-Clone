@@ -2,6 +2,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, MoreHorizontal, Trash2, Edit2 } from 'lucide-react'
 import { Card } from '@/features/cards/components/Card'
+import { CardModal } from '@/features/cards/components/CardModal'
 import { AddCard } from '@/features/cards/components/AddCard'
 import { List as ListType } from '../types'
 import { Card as CardType } from '@/features/boards/types'
@@ -31,6 +32,7 @@ export const SortableList = ({ list, isDragging, isFiltering }: SortableListProp
   const queryClient = useQueryClient()
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [editTitle, setEditTitle] = useState(list.title)
+  const [selectedCard, setSelectedCard] = useState<CardType | null>(null)
 
   const handleAddCard = (title: string) => {
     void api.post(`/lists/${list.id}/cards`, { title })
@@ -41,6 +43,15 @@ export const SortableList = ({ list, isDragging, isFiltering }: SortableListProp
       .catch((error: any) => {
         toast.error(error.response?.data?.error || 'Failed to add card')
       })
+  }
+
+  const handleCardClick = (card: CardType) => {
+    setSelectedCard(card)
+  }
+
+  const handleCardUpdate = () => {
+    queryClient.invalidateQueries({ queryKey: ['board'] })
+    setSelectedCard(null)
   }
 
   const updateListTitle = useMutation({
@@ -151,6 +162,7 @@ export const SortableList = ({ list, isDragging, isFiltering }: SortableListProp
               onMove={moveCard}
               isMoving={isMovingCard}
               isFiltering={isFiltering}
+              onClick={() => handleCardClick(card)}
             />
           ))}
           {(!list.cards || list.cards.length === 0) && (
@@ -162,6 +174,15 @@ export const SortableList = ({ list, isDragging, isFiltering }: SortableListProp
         </SortableContext>
         <AddCard listId={list.id} onAdd={handleAddCard} />
       </div>
+
+      {selectedCard && (
+        <CardModal
+          card={selectedCard}
+          isOpen={!!selectedCard}
+          onClose={() => setSelectedCard(null)}
+          onUpdate={handleCardUpdate}
+        />
+      )}
     </div>
   )
 }
@@ -173,9 +194,10 @@ interface SortableCardProps {
   onMove: (data: { cardId: string; listId: string; position: number }) => void
   isMoving: boolean
   isFiltering?: boolean
+  onClick?: () => void
 }
 
-const SortableCard = ({ card, listId, index: _index, onMove: _onMove, isMoving: _isMoving, isFiltering }: SortableCardProps) => {
+const SortableCard = ({ card, listId, index: _index, onMove: _onMove, isMoving: _isMoving, isFiltering, onClick }: SortableCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card.id,
     data: { listId, card },
@@ -197,18 +219,18 @@ const SortableCard = ({ card, listId, index: _index, onMove: _onMove, isMoving: 
       }`}
       {...attributes}
       {...listeners}
+      onClick={onClick}
     >
       <div className="flex items-start gap-2">
         {!isFiltering && (
-          <button
-            type="button"
+          <div
             {...attributes}
             {...listeners}
-            className="p-1 text-muted-foreground hover:text-foreground flex-shrink-0 mt-0.5"
+            className="p-1 text-muted-foreground hover:text-foreground flex-shrink-0 mt-0.5 cursor-grab"
             aria-label={`Drag card ${card.title}`}
           >
             <GripVertical className="w-4 h-4" />
-          </button>
+          </div>
         )}
         <div className="flex-1 min-w-0">
           <Card card={card} />

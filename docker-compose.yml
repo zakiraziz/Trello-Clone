@@ -1,6 +1,27 @@
 version: '3.8'
 
 services:
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=https://trello-saas-app.b4a.run/api
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - app-network
+
   backend:
     build:
       context: .
@@ -66,7 +87,9 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
+      - ./Frontend/dist:/usr/share/nginx/html:ro
     depends_on:
+      - frontend
       - backend
     restart: unless-stopped
     networks:
