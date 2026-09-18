@@ -2,8 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const io = require('socket.io-client').io
 import { useAuth } from '@/hooks/useAuth'
-
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
+import { SOCKET_URL } from '@/lib/api-url'
 
 interface UseSocketIOOptions {
   boardId?: string

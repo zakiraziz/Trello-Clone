@@ -5,7 +5,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Users table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE users (
 );
 
 -- Notifications table
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     type VARCHAR(50) NOT NULL, -- board, card, mention, assignment, etc.
@@ -40,7 +40,7 @@ CREATE TABLE notifications (
 );
 
 -- Boards table
-CREATE TABLE boards (
+CREATE TABLE IF NOT EXISTS boards (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     description TEXT,
@@ -55,7 +55,7 @@ CREATE TABLE boards (
 );
 
 -- Board members table
-CREATE TABLE board_members (
+CREATE TABLE IF NOT EXISTS board_members (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     board_id UUID NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -65,7 +65,7 @@ CREATE TABLE board_members (
 );
 
 -- Lists table
-CREATE TABLE lists (
+CREATE TABLE IF NOT EXISTS lists (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     board_id UUID NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
@@ -76,7 +76,7 @@ CREATE TABLE lists (
 );
 
 -- Cards table
-CREATE TABLE cards (
+CREATE TABLE IF NOT EXISTS cards (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     list_id UUID NOT NULL REFERENCES lists(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE cards (
 );
 
 -- Card members (assignees)
-CREATE TABLE card_members (
+CREATE TABLE IF NOT EXISTS card_members (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -105,7 +105,7 @@ CREATE TABLE card_members (
 );
 
 -- Labels table
-CREATE TABLE labels (
+CREATE TABLE IF NOT EXISTS labels (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     board_id UUID NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
     name VARCHAR(50),
@@ -114,7 +114,7 @@ CREATE TABLE labels (
 );
 
 -- Card labels (many-to-many)
-CREATE TABLE card_labels (
+CREATE TABLE IF NOT EXISTS card_labels (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
     label_id UUID NOT NULL REFERENCES labels(id) ON DELETE CASCADE,
@@ -122,7 +122,7 @@ CREATE TABLE card_labels (
 );
 
 -- Checklists table
-CREATE TABLE checklists (
+CREATE TABLE IF NOT EXISTS checklists (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL DEFAULT 'Checklist',
@@ -132,7 +132,7 @@ CREATE TABLE checklists (
 );
 
 -- Checklist items
-CREATE TABLE checklist_items (
+CREATE TABLE IF NOT EXISTS checklist_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     checklist_id UUID NOT NULL REFERENCES checklists(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
@@ -145,7 +145,7 @@ CREATE TABLE checklist_items (
 );
 
 -- Comments table
-CREATE TABLE card_comments (
+CREATE TABLE IF NOT EXISTS card_comments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -155,7 +155,7 @@ CREATE TABLE card_comments (
 );
 
 -- Activities table
-CREATE TABLE activities (
+CREATE TABLE IF NOT EXISTS activities (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     board_id UUID NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -167,7 +167,7 @@ CREATE TABLE activities (
 );
 
 -- Attachments table
-CREATE TABLE attachments (
+CREATE TABLE IF NOT EXISTS attachments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -179,7 +179,7 @@ CREATE TABLE attachments (
 );
 
 -- Subscriptions table (for Stripe)
-CREATE TABLE subscriptions (
+CREATE TABLE IF NOT EXISTS subscriptions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     stripe_customer_id VARCHAR(255) UNIQUE NOT NULL,
@@ -194,7 +194,7 @@ CREATE TABLE subscriptions (
 );
 
 -- Invoices table
-CREATE TABLE invoices (
+CREATE TABLE IF NOT EXISTS invoices (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     subscription_id UUID NOT NULL REFERENCES subscriptions(id) ON DELETE CASCADE,
     stripe_invoice_id VARCHAR(255) UNIQUE NOT NULL,
@@ -210,7 +210,7 @@ CREATE TABLE invoices (
 );
 
 -- Webhook events table (for idempotency)
-CREATE TABLE webhook_events (
+CREATE TABLE IF NOT EXISTS webhook_events (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     stripe_event_id VARCHAR(255) UNIQUE NOT NULL,
     event_type VARCHAR(100) NOT NULL,
@@ -220,21 +220,21 @@ CREATE TABLE webhook_events (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_stripe_customer ON users(stripe_customer_id);
-CREATE INDEX idx_boards_owner ON boards(owner_id);
-CREATE INDEX idx_boards_member ON board_members(user_id);
-CREATE INDEX idx_lists_board ON lists(board_id);
-CREATE INDEX idx_cards_list ON cards(list_id);
-CREATE INDEX idx_cards_assigned ON cards(assigned_to);
-CREATE INDEX idx_card_members_user ON card_members(user_id);
-CREATE INDEX idx_activities_board ON activities(board_id);
-CREATE INDEX idx_activities_user ON activities(user_id);
-CREATE INDEX idx_activities_created ON activities(created_at);
-CREATE INDEX idx_comments_card ON card_comments(card_id);
-CREATE INDEX idx_checklists_card ON checklists(card_id);
-CREATE INDEX idx_attachments_card ON attachments(card_id);
-CREATE INDEX idx_webhook_events_stripe ON webhook_events(stripe_event_id);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_stripe_customer ON users(stripe_customer_id);
+CREATE INDEX IF NOT EXISTS idx_boards_owner ON boards(owner_id);
+CREATE INDEX IF NOT EXISTS idx_boards_member ON board_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_lists_board ON lists(board_id);
+CREATE INDEX IF NOT EXISTS idx_cards_list ON cards(list_id);
+CREATE INDEX IF NOT EXISTS idx_cards_assigned ON cards(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_card_members_user ON card_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_activities_board ON activities(board_id);
+CREATE INDEX IF NOT EXISTS idx_activities_user ON activities(user_id);
+CREATE INDEX IF NOT EXISTS idx_activities_created ON activities(created_at);
+CREATE INDEX IF NOT EXISTS idx_comments_card ON card_comments(card_id);
+CREATE INDEX IF NOT EXISTS idx_checklists_card ON checklists(card_id);
+CREATE INDEX IF NOT EXISTS idx_attachments_card ON attachments(card_id);
+CREATE INDEX IF NOT EXISTS idx_webhook_events_stripe ON webhook_events(stripe_event_id);
 
 -- Updated at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -246,26 +246,34 @@ END;
 $$ language 'plpgsql';
 
 -- Apply updated_at triggers
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_boards_updated_at ON boards;
 CREATE TRIGGER update_boards_updated_at BEFORE UPDATE ON boards
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_lists_updated_at ON lists;
 CREATE TRIGGER update_lists_updated_at BEFORE UPDATE ON lists
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_cards_updated_at ON cards;
 CREATE TRIGGER update_cards_updated_at BEFORE UPDATE ON cards
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_checklists_updated_at ON checklists;
 CREATE TRIGGER update_checklists_updated_at BEFORE UPDATE ON checklists
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_checklist_items_updated_at ON checklist_items;
 CREATE TRIGGER update_checklist_items_updated_at BEFORE UPDATE ON checklist_items
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_comments_updated_at ON card_comments;
 CREATE TRIGGER update_comments_updated_at BEFORE UPDATE ON card_comments
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_subscriptions_updated_at ON subscriptions;
 CREATE TRIGGER update_subscriptions_updated_at BEFORE UPDATE ON subscriptions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

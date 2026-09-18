@@ -1,9 +1,10 @@
 // src/api/axios.ts
 import axios from 'axios';
 import { toast } from 'sonner';
+import { API_BASE_URL } from '../lib/api-url';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://trello-backend-production-6c60.up.railway.app/api',
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
