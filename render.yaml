@@ -46,6 +46,12 @@ services:
         value: 7d
       - key: JWT_REFRESH_EXPIRES_IN
         value: 30d
+      # Optional integrations (Stripe, SendGrid, Sentry, ...) are intentionally
+      # NOT declared here so the Blueprint applies with zero input. Add them as
+      # environment variables in the Render dashboard when you need them:
+      # STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SENDGRID_API_KEY, SENTRY_DSN.
+      - key: EMAIL_FROM
+        value: noreply@trello-clone.com
       # Public URL of the static site below — used for CORS, Socket.IO and the
       # links inside transactional emails.
       - key: CLIENT_URL
@@ -58,15 +64,6 @@ services:
           name: trello-frontend
           type: web
           envVarKey: RENDER_EXTERNAL_URL
-      # Optional integrations — fill these in from the Render dashboard.
-      - key: STRIPE_SECRET_KEY
-        sync: false
-      - key: STRIPE_WEBHOOK_SECRET
-        sync: false
-      - key: SENDGRID_API_KEY
-        sync: false
-      - key: EMAIL_FROM
-        value: noreply@trello-clone.com
 
   # =====================
   # Frontend — Static Site
